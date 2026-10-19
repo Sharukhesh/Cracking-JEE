@@ -25,12 +25,13 @@
         <div class="flex items-center gap-2">
           <label class="text-xs text-slate-400">Logging as:</label>
           <select id="userSelect" onchange="switchUser()" class="bg-slate-800 border border-slate-600 text-white text-sm font-semibold rounded-xl px-3 py-1.5 focus:outline-none focus:border-indigo-400"></select>
-          <button onclick="addFriend()" class="bg-indigo-600 hover:bg-indigo-500 text-xs text-white font-semibold px-3 py-1.5 rounded-xl transition">+ Add Friend</button>
+          <button onclick="addFriend()" class="bg-indigo-600 hover:bg-indigo-500 text-xs text-white font-semibold px-3 py-1.5 rounded-xl transition">+ Add</button>
+          <button onclick="removeCurrentMember()" class="bg-rose-600/80 hover:bg-rose-600 text-xs text-white font-semibold px-3 py-1.5 rounded-xl transition">- Remove</button>
         </div>
       </div>
 
       <div class="flex items-center gap-3">
-        <span id="syncStatus" class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">🟢 Connecting to Cloud...</span>
+        <span id="syncStatus" class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">🟢 Connecting...</span>
         <button onclick="syncFromCloud()" class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-600 px-3 py-1 rounded-xl text-slate-300">↻ Refresh</button>
       </div>
     </div>
@@ -105,7 +106,7 @@
           <div class="space-y-2.5 mb-4" id="habitList"></div>
 
           <div class="flex gap-2">
-            <input type="text" id="customGoalInput" placeholder="Add a shared squad goal for this date (e.g., Solve 25 PYQs in Vectors)..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white">
+            <input type="text" id="customGoalInput" placeholder="Add a shared squad goal for this date..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white">
             <button onclick="addCustomGoal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm px-4 py-2 rounded-xl">Add Goal</button>
           </div>
         </section>
@@ -113,7 +114,7 @@
         <!-- Squad RPT / CPT Score Logger -->
         <section class="glass rounded-2xl p-6">
           <h2 class="text-lg font-bold text-white mb-1">🎯 Squad RPT / CPT / FST Scoreboard (300 Marks | +4 / -1)</h2>
-          <p class="text-xs text-slate-400 mb-4">Enter Correct (+4) and Wrong (-1) questions to log your score to the shared squad table.</p>
+          <p class="text-xs text-slate-400 mb-4">Enter Correct (+4) and Wrong (-1) questions to log your score.</p>
 
           <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
             <div class="md:col-span-2">
@@ -190,20 +191,18 @@
         </section>
       </div>
 
-      <!-- Right Column: Squad Leaderboard, Streak Chart & Upcoming -->
+      <!-- Right Column -->
       <div class="space-y-6">
 
-        <!-- Live Squad Leaderboard -->
         <section class="glass rounded-2xl p-6">
           <div class="flex items-center justify-between mb-2">
             <h2 class="text-lg font-bold text-white">🏆 Squad Daily Leaderboard</h2>
             <span class="text-[11px] text-emerald-400 font-semibold">Real-Time</span>
           </div>
-          <p class="text-xs text-slate-400 mb-4">Daily goal completion across the squad for selected date:</p>
+          <p class="text-xs text-slate-400 mb-4">Daily goal completion across the squad:</p>
           <div class="space-y-3" id="squadLeaderboard"></div>
         </section>
 
-        <!-- Weekly Streak Chart -->
         <section class="glass rounded-2xl p-6">
           <div class="flex items-center justify-between mb-4">
             <div>
@@ -216,10 +215,9 @@
           <div class="grid grid-cols-7 gap-2 text-center mt-2" id="weeklyChartLabels"></div>
         </section>
 
-        <!-- Upcoming Exams Radar -->
         <section class="glass rounded-2xl p-6">
           <h2 class="text-lg font-bold text-white mb-1">🚀 Upcoming Exam Radar</h2>
-          <p class="text-xs text-slate-400 mb-3">Click any upcoming test to jump to that date:</p>
+          <p class="text-xs text-slate-400 mb-3">Click any test to jump to that date:</p>
           <div class="space-y-2 max-h-72 overflow-y-auto custom-scroll pr-1" id="upcomingExamsList"></div>
         </section>
 
@@ -228,10 +226,8 @@
   </div>
 
   <script>
-    // Pre-configured with your exact Firebase Realtime Database URL!
     const FIREBASE_DB_URL = "https://cracking-jee-default-rtdb.firebaseio.com";
 
-    // Full SNGS Academy JEE + CBSE Board DPT Schedule (Biology Excluded)
     const scheduleDB = {
       "2026-08-31": { dpt: { mon: "English / C.S: Unit Test 1" } },
       "2026-09-01": { jee: { phy: "Units and dimensions", chem: "Mole concept, Stoichiometry", math: "Logarithms & Inequalities" }, dpt: { phy: "Electric charges and fields" } },
@@ -253,7 +249,7 @@
       "2026-09-21": { jee: { phy: "Revision", chem: "Revision", math: "Area under Curves" } },
       "2026-09-22": { jee: { phy: "Revision", chem: "Revision", math: "Quadratic Equations" }, dpt: { phy: "Moving charges and Magnetism" } },
       "2026-09-23": { jee: { phy: "Revision", chem: "Revision", math: "Complex Numbers" } },
-      "2026-09-24": { jee: { phy: "Revision", chem: "Revision", math: "Complex Numbers" }, dpt: { chem: "Solutions", math: "Application of Integration" } },
+      "2026-09-24": { jee: { phy: "Revision", chem: "Revision", math: "Application of Integration" }, dpt: { chem: "Solutions", math: "Application of Integration" } },
       "2026-09-25": { jee: { phy: "Revision", chem: "Revision", math: "Revision" } },
       "2026-09-26": { jeeExam: "CPT-1 [RPT 1+2+3] (300 Marks)" },
       "2026-09-28": { jee: { phy: "System of particles", chem: "P-block elements", math: "Sequence & Series" }, dpt: { mon: "English / C.S: Unit Test 2" } },
@@ -357,9 +353,9 @@
       { id: "h5", title: "Update RPT/CPT Mistake & Formula Log (30 mins)", tag: "Revision" }
     ];
 
-    let state = JSON.parse(localStorage.getItem("sngs_squad_v3")) || {
-      members: ["ADMIN", "Abel"],
-      currentUser: localStorage.getItem("sngs_my_name") || "ADMIN",
+    let state = JSON.parse(localStorage.getItem("sngs_squad_v4")) || {
+      members: ["Abel"],
+      currentUser: "Abel",
       completions: {},
       customGoals: {},
       scores: []
@@ -370,29 +366,27 @@
         const res = await fetch(`${FIREBASE_DB_URL}/squadData.json`);
         if (res.ok) {
           const cloudData = await res.json();
-          if (cloudData) {
-            const savedName = localStorage.getItem("sngs_my_name") || state.currentUser;
-            state = {
-              members: cloudData.members || state.members,
-              currentUser: (cloudData.members && cloudData.members.includes(savedName)) ? savedName : (cloudData.members ? cloudData.members[0] : "ADMIN"),
-              completions: cloudData.completions || {},
-              customGoals: cloudData.customGoals || {},
-              scores: cloudData.scores || []
-            };
-            localStorage.setItem("sngs_squad_v3", JSON.stringify(state));
+          if (cloudData && cloudData.members) {
+            state.members = cloudData.members;
+            state.completions = cloudData.completions || {};
+            state.customGoals = cloudData.customGoals || {};
+            state.scores = cloudData.scores || [];
+            if (!state.members.includes(state.currentUser)) {
+              state.currentUser = state.members[0] || "Abel";
+            }
           } else {
             await pushToCloud();
           }
-          document.getElementById("syncStatus").textContent = "🟢 Live Cloud Synced";
+          document.getElementById("syncStatus").textContent = "🟢 Synced";
           renderAll();
         }
       } catch (e) {
-        document.getElementById("syncStatus").textContent = "🔴 Offline Mode";
+        document.getElementById("syncStatus").textContent = "🔴 Offline";
       }
     }
 
     async function pushToCloud() {
-      localStorage.setItem("sngs_squad_v3", JSON.stringify(state));
+      localStorage.setItem("sngs_squad_v4", JSON.stringify(state));
       try {
         await fetch(`${FIREBASE_DB_URL}/squadData.json`, {
           method: "PUT",
@@ -404,29 +398,45 @@
             scores: state.scores
           })
         });
-        document.getElementById("syncStatus").textContent = "🟢 Saved to Cloud";
+        document.getElementById("syncStatus").textContent = "🟢 Synced";
       } catch (e) {
-        document.getElementById("syncStatus").textContent = "🔴 Sync Error";
+        document.getElementById("syncStatus").textContent = "🔴 Error";
       }
     }
 
     function switchUser() {
       state.currentUser = document.getElementById("userSelect").value;
-      localStorage.setItem("sngs_my_name", state.currentUser);
       renderAll();
     }
 
     function addFriend() {
-      const name = prompt("Enter friend's name to join the squad:");
+      const name = prompt("Enter new member name:");
       if (!name || !name.trim()) return;
       const clean = name.trim();
       if (!state.members.includes(clean)) {
         state.members.push(clean);
       }
       state.currentUser = clean;
-      localStorage.setItem("sngs_my_name", clean);
       pushToCloud();
       renderAll();
+    }
+
+    function removeCurrentMember() {
+      if (state.members.length <= 1) {
+        alert("You cannot remove the last remaining member!");
+        return;
+      }
+      const current = state.currentUser;
+      if (confirm(`Are you sure you want to remove "${current}" from the squad?`)) {
+        // Remove from members list
+        state.members = state.members.filter(m => m !== current);
+        // Clean up their completion data
+        if (state.completions[current]) delete state.completions[current];
+        // Switch to the first available member
+        state.currentUser = state.members[0];
+        pushToCloud();
+        renderAll();
+      }
     }
 
     function changeDate(offset) {
@@ -503,9 +513,9 @@
         ? `<span class="px-3 py-1 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold">🎉 ${entry.holiday}</span>` : "";
 
       document.getElementById("jeeScheduleCards").innerHTML = `
-        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700"><div class="text-xs font-bold text-sky-400">⚡ Physics</div><div class="text-sm text-white mt-0.5">${jee.phy || (entry.jeeExam ? entry.jeeExam : "Self-Revision / Problem Solving")}</div></div>
-        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700"><div class="text-xs font-bold text-amber-400">🧪 Chemistry</div><div class="text-sm text-white mt-0.5">${jee.chem || (entry.jeeExam ? entry.jeeExam : "Self-Revision / NCERT Recap")}</div></div>
-        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700"><div class="text-xs font-bold text-rose-400">📐 Maths</div><div class="text-sm text-white mt-0.5">${jee.math || (entry.jeeExam ? entry.jeeExam : "Self-Revision / PYQ Practice")}</div></div>
+        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700"><div class="text-xs font-bold text-sky-400">⚡ Physics</div><div class="text-sm text-white mt-0.5">${jee.phy || "Self-Revision / Problem Solving"}</div></div>
+        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700"><div class="text-xs font-bold text-amber-400">🧪 Chemistry</div><div class="text-sm text-white mt-0.5">${jee.chem || "Self-Revision / NCERT Recap"}</div></div>
+        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700"><div class="text-xs font-bold text-rose-400">📐 Maths</div><div class="text-sm text-white mt-0.5">${jee.math || "Self-Revision / PYQ Practice"}</div></div>
       `;
 
       const dptDiv = document.getElementById("dptScheduleCard");
@@ -517,7 +527,7 @@
         if (entry.dpt.math) parts.push(`<b>Thu Maths DPT:</b> ${entry.dpt.math}`);
         dptDiv.innerHTML = `<span class="text-emerald-400 font-semibold">CBSE DPT Today:</span> ${parts.join(" • ")}`;
       } else {
-        dptDiv.innerHTML = `<span class="text-slate-400 text-xs">No CBSE DPT exam today. Use your board slot to prep for this week's Mon/Tue/Thu single-chapter test.</span>`;
+        dptDiv.innerHTML = `<span class="text-slate-400 text-xs">No CBSE DPT exam today. Use your board slot to prep for this week's single-chapter test.</span>`;
       }
 
       const goals = getGoalsForDate(dateStr);
@@ -608,7 +618,7 @@
       }
       document.getElementById("myStreakCount").textContent = `${streak} Days`;
 
-      // Upcoming Exams Radar
+      // Upcoming Exams
       const upDates = Object.keys(scheduleDB).sort().filter(d => d >= dateStr && (scheduleDB[d].jeeExam || scheduleDB[d].boardExam || scheduleDB[d].dpt)).slice(0, 7);
       document.getElementById("upcomingExamsList").innerHTML = upDates.map(d => {
         const it = scheduleDB[d];
@@ -641,7 +651,7 @@
 
     renderAll();
     syncFromCloud();
-    setInterval(syncFromCloud, 12000); // Auto-sync every 12 seconds
+    setInterval(syncFromCloud, 12000);
   </script>
 </body>
 </html>
