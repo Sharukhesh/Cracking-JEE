@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cracking JEE Squad | SNGS Academy 2026-27</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+    .glass { background: rgba(30, 41, 59, 0.78); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #1e293b; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen p-4 md:p-6">
+
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- Top Squad Bar -->
+    <div class="glass rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-l-4 border-indigo-500">
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="text-xs font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full">👥 Cracking JEE Squad</span>
+        <div class="flex items-center gap-2">
+          <label class="text-xs text-slate-400">Logging as:</label>
+          <select id="userSelect" onchange="switchUser()" class="bg-slate-800 border border-slate-600 text-white text-sm font-semibold rounded-xl px-3 py-1.5 focus:outline-none focus:border-indigo-400"></select>
+          <button onclick="addFriend()" class="bg-indigo-600 hover:bg-indigo-500 text-xs text-white font-semibold px-3 py-1.5 rounded-xl transition">+ Add Friend</button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span id="syncStatus" class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">🟢 Connecting to Cloud...</span>
+        <button onclick="syncFromCloud()" class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-600 px-3 py-1 rounded-xl text-slate-300">↻ Refresh</button>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <header class="glass rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold text-white">SNGS JEE Mains & Board Squad Dashboard</h1>
+        <p class="text-slate-400 text-sm mt-0.5">Live Squad Habit Tracker • RPT/CPT (+4/-1) 300-Mark Logger • Mon/Tue/Thu CBSE DPTs</p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-4">
+        <div class="flex items-center gap-3 bg-slate-800/90 border border-slate-700 px-4 py-2 rounded-xl">
+          <span class="text-2xl">🔥</span>
+          <div>
+            <div class="text-[11px] text-slate-400 uppercase font-semibold">Active Streak</div>
+            <div class="text-lg font-bold text-amber-400" id="myStreakCount">0 Days</div>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[11px] text-slate-400 block mb-1">Schedule Date:</label>
+          <div class="flex items-center gap-1">
+            <button onclick="changeDate(-1)" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-xs">◀</button>
+            <input type="date" id="datePicker" onchange="renderAll()" class="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg px-3 py-1.5" value="2026-10-19" min="2026-08-31" max="2027-02-15">
+            <button onclick="changeDate(1)" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-xs">▶</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left 2 Columns -->
+      <div class="lg:col-span-2 space-y-6">
+
+        <!-- Today's Timetable -->
+        <section class="glass rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                📅 Daily Timetable & Exam Sync
+                <span id="dayBadge" class="text-xs px-2.5 py-0.5 rounded bg-slate-700 text-slate-300">Monday</span>
+              </h2>
+              <p class="text-xs text-slate-400" id="dateSubtext"></p>
+            </div>
+            <div id="examAlertBadge"></div>
+          </div>
+
+          <div class="text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-2">JEE Mains Revision Plan (RPT / CPT Track)</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4" id="jeeScheduleCards"></div>
+
+          <div class="text-xs font-semibold uppercase tracking-wider text-emerald-400 mb-2">CBSE Board DPT Track (Mon: CS/Eng • Tue: Phy • Thu: Chem & Maths)</div>
+          <div id="dptScheduleCard" class="p-3.5 rounded-xl bg-slate-800/70 border border-slate-700/80 text-sm"></div>
+        </section>
+
+        <!-- Daily Habit Checklist -->
+        <section class="glass rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h2 class="text-lg font-bold text-white">✅ <span id="activeUserTitle">My</span> Daily Goals</h2>
+              <p class="text-xs text-slate-400">Checking these off updates the Squad Leaderboard for everyone!</p>
+            </div>
+            <span class="text-sm font-bold text-indigo-400" id="dailyProgressText">0 / 5 (0%)</span>
+          </div>
+
+          <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden mb-4">
+            <div id="dailyProgressBar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-300" style="width: 0%"></div>
+          </div>
+
+          <div class="space-y-2.5 mb-4" id="habitList"></div>
+
+          <div class="flex gap-2">
+            <input type="text" id="customGoalInput" placeholder="Add a shared squad goal for this date (e.g., Solve 25 PYQs in Vectors)..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white">
+            <button onclick="addCustomGoal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm px-4 py-2 rounded-xl">Add Goal</button>
+          </div>
+        </section>
+
+        <!-- Squad RPT / CPT Score Logger -->
+        <section class="glass rounded-2xl p-6">
+          <h2 class="text-lg font-bold text-white mb-1">🎯 Squad RPT / CPT / FST Scoreboard (300 Marks | +4 / -1)</h2>
+          <p class="text-xs text-slate-400 mb-4">Enter Correct (+4) and Wrong (-1) questions to log your score to the shared squad table.</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+            <div class="md:col-span-2">
+              <label class="text-xs text-slate-400 block mb-1">Select Exam</label>
+              <select id="examSelect" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                <option value="RPT-1 (05 Sep)">RPT-1 (05 Sep 2026)</option>
+                <option value="RPT-2 (12 Sep)">RPT-2 (12 Sep 2026)</option>
+                <option value="RPT-3 (18 Sep)">RPT-3 (18 Sep 2026)</option>
+                <option value="CPT-1 (26 Sep)">CPT-1 [RPT 1+2+3] (26 Sep 2026)</option>
+                <option value="RPT-4 (03 Oct)">RPT-4 (03 Oct 2026)</option>
+                <option value="RPT-5 (10 Oct)">RPT-5 (10 Oct 2026)</option>
+                <option value="RPT-6 (16 Oct)">RPT-6 (16 Oct 2026)</option>
+                <option value="CPT-2 (24 Oct)" selected>CPT-2 [RPT 4+5+6] (24 Oct 2026)</option>
+                <option value="RPT-7 (31 Oct)">RPT-7 (31 Oct 2026)</option>
+                <option value="RPT-8 (06 Nov)">RPT-8 (06 Nov 2026)</option>
+                <option value="RPT-9 (14 Nov)">RPT-9 (14 Nov 2026)</option>
+                <option value="CPT-3 (21 Nov)">CPT-3 [RPT 7+8+9] (21 Nov 2026)</option>
+                <option value="RPT-10 (28 Nov)">RPT-10 (28 Nov 2026)</option>
+                <option value="RPT-11 (05 Dec)">RPT-11 (05 Dec 2026)</option>
+                <option value="RPT-12 (12 Dec)">RPT-12 (12 Dec 2026)</option>
+                <option value="CPT-4 (17 Dec)">CPT-4 [RPT 10+11+12] (17 Dec 2026)</option>
+                <option value="FST (Dec-Jan)">Full Syllabus Test (FST 1–15)</option>
+              </select>
+            </div>
+            <div class="md:col-span-2 flex items-end">
+              <div class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 flex justify-between items-center">
+                <span class="text-xs text-slate-400">Calculated Total:</span>
+                <span id="liveTotalScore" class="text-lg font-bold text-indigo-400">0 / 300</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+            <div class="p-3 bg-slate-800/60 border border-slate-700 rounded-xl">
+              <div class="text-xs font-bold text-sky-400 mb-2">⚡ Physics (+4 / -1)</div>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="number" id="phyC" placeholder="Correct" min="0" max="25" oninput="calcLiveScore()" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+                <input type="number" id="phyW" placeholder="Wrong" min="0" max="25" oninput="calcLiveScore()" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+              </div>
+            </div>
+            <div class="p-3 bg-slate-800/60 border border-slate-700 rounded-xl">
+              <div class="text-xs font-bold text-amber-400 mb-2">🧪 Chemistry (+4 / -1)</div>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="number" id="chemC" placeholder="Correct" min="0" max="25" oninput="calcLiveScore()" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+                <input type="number" id="chemW" placeholder="Wrong" min="0" max="25" oninput="calcLiveScore()" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+              </div>
+            </div>
+            <div class="p-3 bg-slate-800/60 border border-slate-700 rounded-xl">
+              <div class="text-xs font-bold text-rose-400 mb-2">📐 Maths (+4 / -1)</div>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="number" id="mathC" placeholder="Correct" min="0" max="25" oninput="calcLiveScore()" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+                <input type="number" id="mathW" placeholder="Wrong" min="0" max="25" oninput="calcLiveScore()" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+              </div>
+            </div>
+          </div>
+
+          <button onclick="saveTestScore()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm py-2.5 rounded-xl transition mb-4">Post My Score to Squad Board</button>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-700 text-slate-400">
+                  <th class="py-2 px-2">Member</th>
+                  <th class="py-2 px-2">Exam</th>
+                  <th class="py-2 px-2">Phy</th>
+                  <th class="py-2 px-2">Chem</th>
+                  <th class="py-2 px-2">Maths</th>
+                  <th class="py-2 px-2">Total (/300)</th>
+                </tr>
+              </thead>
+              <tbody id="scoreLogTable" class="divide-y divide-slate-800"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right Column: Squad Leaderboard, Streak Chart & Upcoming -->
+      <div class="space-y-6">
+
+        <!-- Live Squad Leaderboard -->
+        <section class="glass rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-lg font-bold text-white">🏆 Squad Daily Leaderboard</h2>
+            <span class="text-[11px] text-emerald-400 font-semibold">Real-Time</span>
+          </div>
+          <p class="text-xs text-slate-400 mb-4">Daily goal completion across the squad for selected date:</p>
+          <div class="space-y-3" id="squadLeaderboard"></div>
+        </section>
+
+        <!-- Weekly Streak Chart -->
+        <section class="glass rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-lg font-bold text-white">📊 Weekly Streak Chart</h2>
+              <p class="text-xs text-slate-400">7-day consistency (<span id="chartUserLabel"></span>)</p>
+            </div>
+            <span id="weeklyAvgBadge" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300">0%</span>
+          </div>
+          <div class="grid grid-cols-7 gap-2 items-end h-40 pt-4 px-1 border-b border-slate-700 pb-2" id="weeklyChartBars"></div>
+          <div class="grid grid-cols-7 gap-2 text-center mt-2" id="weeklyChartLabels"></div>
+        </section>
+
+        <!-- Upcoming Exams Radar -->
+        <section class="glass rounded-2xl p-6">
+          <h2 class="text-lg font-bold text-white mb-1">🚀 Upcoming Exam Radar</h2>
+          <p class="text-xs text-slate-400 mb-3">Click any upcoming test to jump to that date:</p>
+          <div class="space-y-2 max-h-72 overflow-y-auto custom-scroll pr-1" id="upcomingExamsList"></div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Pre-configured with your exact Firebase Realtime Database URL!
+    const FIREBASE_DB_URL = "https://cracking-jee-default-rtdb.firebaseio.com";
+
+    // Full SNGS Academy JEE + CBSE Board DPT Schedule (Biology Excluded)
+    const scheduleDB = {
+      "2026-08-31": { dpt: { mon: "English / C.S: Unit Test 1" } },
+      "2026-09-01": { jee: { phy: "Units and dimensions", chem: "Mole concept, Stoichiometry", math: "Logarithms & Inequalities" }, dpt: { phy: "Electric charges and fields" } },
+      "2026-09-02": { jee: { phy: "Error analysis", chem: "Concentration terms, Raoult's & Henry's law", math: "Logarithms & Inequalities" } },
+      "2026-09-03": { jee: { phy: "Kinematics I", chem: "Colligative properties", math: "Relations 1 & 2" }, dpt: { chem: "Solutions", math: "Relation and Functions" } },
+      "2026-09-04": { holiday: "Krishna Jayanthi / 11th Grade PTM" },
+      "2026-09-05": { jeeExam: "RPT-1 (300 Marks)" },
+      "2026-09-07": { jee: { phy: "Kinematics 2", chem: "Periodic Classification", math: "Matrices & Determinants" }, dpt: { mon: "English / C.S: Unit Test 1" } },
+      "2026-09-08": { jee: { phy: "Newton's laws of motion", chem: "Chemical Bonding", math: "Matrices & Determinants" }, dpt: { phy: "Electric Potential and capacitance" } },
+      "2026-09-09": { jee: { phy: "Friction", chem: "VSEPR, MOT", math: "Statistics" } },
+      "2026-09-10": { jee: { phy: "Circular motion", chem: "Coordination compounds", math: "Statistics" }, dpt: { chem: "Coordination compounds", math: "Matrices" } },
+      "2026-09-11": { jee: { phy: "Constraint equation", chem: "CFT", math: "Sets" } },
+      "2026-09-12": { jeeExam: "RPT-2 (300 Marks)" },
+      "2026-09-14": { holiday: "Vinayagar Chathurthi / Staff Holiday" },
+      "2026-09-15": { jee: { phy: "Work, Power, Energy", chem: "Chemical Equilibrium", math: "Functions 1" }, dpt: { phy: "Current Electricity" } },
+      "2026-09-16": { jee: { phy: "Collisions", chem: "Ionic Equilibrium", math: "Functions 2" } },
+      "2026-09-17": { jee: { phy: "Vertical circular motion", chem: "Rate law, Order", math: "Area under Curves" }, dpt: { chem: "Chemical Kinetics", math: "Determinants" } },
+      "2026-09-18": { jee: { phy: "Centre of mass", chem: "1st & 2nd order reactions", math: "Area under Curves" }, jeeExam: "RPT-3 (300 Marks)" },
+      "2026-09-21": { jee: { phy: "Revision", chem: "Revision", math: "Area under Curves" } },
+      "2026-09-22": { jee: { phy: "Revision", chem: "Revision", math: "Quadratic Equations" }, dpt: { phy: "Moving charges and Magnetism" } },
+      "2026-09-23": { jee: { phy: "Revision", chem: "Revision", math: "Complex Numbers" } },
+      "2026-09-24": { jee: { phy: "Revision", chem: "Revision", math: "Complex Numbers" }, dpt: { chem: "Solutions", math: "Application of Integration" } },
+      "2026-09-25": { jee: { phy: "Revision", chem: "Revision", math: "Revision" } },
+      "2026-09-26": { jeeExam: "CPT-1 [RPT 1+2+3] (300 Marks)" },
+      "2026-09-28": { jee: { phy: "System of particles", chem: "P-block elements", math: "Sequence & Series" }, dpt: { mon: "English / C.S: Unit Test 2" } },
+      "2026-09-29": { jee: { phy: "Moment of inertia", chem: "D & F block elements", math: "Sequence & Series" }, dpt: { phy: "Magnetism and matter" } },
+      "2026-09-30": { jee: { phy: "Rotational mechanics", chem: "Bohr's model of atom", math: "Binomial Theorem" } },
+      "2026-10-01": { jee: { phy: "Rolling motion", chem: "Quantum model of atom", math: "Binomial Theorem" }, dpt: { chem: "D & F Block elements" } },
+      "2026-10-02": { holiday: "Gandhi Jayanthi / Staff Holiday" },
+      "2026-10-03": { jeeExam: "RPT-4 (300 Marks)" },
+      "2026-10-05": { jee: { phy: "Gravitation", chem: "Electrochemical cells", math: "Binomial Theorem" }, dpt: { mon: "English / C.S: Unit Test 2" } },
+      "2026-10-06": { jee: { phy: "Gravitation", chem: "Electrolytic cells, Faraday's laws", math: "Vectors & 3D" }, dpt: { phy: "Electromagnetic induction" } },
+      "2026-10-07": { jee: { phy: "Mechanical properties of solids", chem: "Nernst equation, Batteries", math: "Vectors & 3D" } },
+      "2026-10-08": { jee: { phy: "Fluid statics", chem: "Redox reactions", math: "Vectors & 3D" }, dpt: { chem: "Electrochemistry", math: "Vectors" } },
+      "2026-10-09": { jee: { phy: "Fluid dynamics", chem: "Practical organic chemistry, Purification", math: "Vectors & 3D" } },
+      "2026-10-10": { jeeExam: "RPT-5 (300 Marks)" },
+      "2026-10-12": { jee: { phy: "Kinetic theory of gases", chem: "Types of processes (Thermo)", math: "Straight Lines" } },
+      "2026-10-13": { jee: { phy: "Thermal properties, Conduction, Convection", chem: "Laws of thermodynamics", math: "Straight Lines" }, dpt: { phy: "Alternating currents" } },
+      "2026-10-14": { jee: { phy: "Radiation", chem: "Enthalpy, Entropy, Gibbs energy", math: "Circle" } },
+      "2026-10-15": { jee: { phy: "Calorimetry", chem: "Biomolecules", math: "Circle" }, dpt: { chem: "Biomolecules", math: "3D Geometry" } },
+      "2026-10-16": { jeeExam: "RPT-6 (300 Marks)" },
+      "2026-10-18": { holiday: "Dussehra Holiday" },
+      "2026-10-19": { holiday: "Dussehra Holiday (CPT-2 Prep)" },
+      "2026-10-20": { jee: { phy: "CPT-2 Revision", chem: "CPT-2 Revision", math: "CPT-2 Revision" } },
+      "2026-10-21": { jee: { phy: "Revision", chem: "Revision", math: "Inverse Trigonometric Functions" }, dpt: { phy: "Electromagnetic waves" } },
+      "2026-10-22": { jee: { phy: "Revision", chem: "Revision", math: "Inverse Trigonometric Functions" } },
+      "2026-10-23": { jee: { phy: "Revision", chem: "Revision", math: "Revision" }, dpt: { chem: "Electrochemistry", math: "Inverse Trigonometric Functions" } },
+      "2026-10-24": { jeeExam: "CPT-2 [RPT 4+5+6] (300 Marks)" },
+      "2026-10-26": { jee: { phy: "Thermodynamics", chem: "General Organic Chemistry (GOC)", math: "Methods of Differentiation" }, dpt: { mon: "English / C.S: Unit Test 3" } },
+      "2026-10-27": { jee: { phy: "Thermodynamics", chem: "Electron displacement effects, Reactions", math: "Methods of Differentiation" }, dpt: { phy: "Ray optics" } },
+      "2026-10-28": { jee: { phy: "Linear SHM", chem: "Alcohols", math: "Limits" } },
+      "2026-10-29": { jee: { phy: "Angular SHM", chem: "Phenols", math: "Limits" }, dpt: { chem: "Alcohols, phenols & ethers", math: "Continuity & Differentiability - 1" } },
+      "2026-10-30": { jee: { phy: "Waves", chem: "Ethers", math: "Limits" } },
+      "2026-10-31": { jeeExam: "RPT-7 (300 Marks)" },
+      "2026-11-02": { jee: { phy: "Electrostatics 1", chem: "Nomenclature", math: "Continuity & Differentiability" }, dpt: { mon: "English / C.S: Unit Test 3" } },
+      "2026-11-03": { jee: { phy: "Electrostatics 2", chem: "Alkanes, Alkenes, Alkynes", math: "Continuity & Differentiability" }, dpt: { phy: "Wave optics" } },
+      "2026-11-04": { jee: { phy: "Capacitors", chem: "Haloalkanes", math: "Application of Differentiation" } },
+      "2026-11-05": { jee: { phy: "Current Electricity", chem: "Haloarenes", math: "Application of Differentiation" }, dpt: { chem: "Haloalkanes & Haloarenes", math: "Continuity & Differentiability - 2" } },
+      "2026-11-06": { jeeExam: "RPT-8 (300 Marks)" },
+      "2026-11-07": { holiday: "Diwali Holidays" },
+      "2026-11-08": { holiday: "Diwali Holidays" },
+      "2026-11-10": { jee: { phy: "Moving charges and Magnetism", chem: "Aldehydes", math: "Definite Integration" }, dpt: { phy: "Dual nature of radiation and matter" } },
+      "2026-11-11": { jee: { phy: "Magnetism and Matter", chem: "Ketones", math: "Definite Integration" } },
+      "2026-11-12": { jee: { phy: "Electromagnetic Induction (EMI)", chem: "Carboxylic acids", math: "Definite Integration" }, dpt: { chem: "Aldehydes, ketones & carboxylic acids", math: "Application of Differentiation - 1" } },
+      "2026-11-13": { jee: { phy: "RLC Circuits", chem: "Carboxylic acids", math: "Indefinite Integration" } },
+      "2026-11-14": { jeeExam: "RPT-9 (300 Marks)" },
+      "2026-11-16": { boardExam: "PRE-BOARD CBSE EXAM 1: PHYSICS" },
+      "2026-11-17": { jee: { phy: "Revision", chem: "Revision", math: "Revision" }, dpt: { phy: "Atoms" } },
+      "2026-11-18": { jee: { phy: "Revision", chem: "Revision", math: "Revision" } },
+      "2026-11-19": { jee: { phy: "Revision", chem: "Revision", math: "Revision" }, dpt: { chem: "Organic Naming reactions", math: "Application of Differentiation - 2" } },
+      "2026-11-20": { jee: { phy: "Revision", chem: "Revision", math: "Revision" } },
+      "2026-11-21": { jeeExam: "CPT-3 [RPT 7+8+9] (300 Marks)" },
+      "2026-11-23": { jee: { phy: "Alternating Current", chem: "Aliphatic amines", math: "Permutation & Combination" } },
+      "2026-11-24": { jee: { phy: "EM Waves", chem: "Aromatic amines", math: "Permutation & Combination" }, dpt: { phy: "Nuclei" } },
+      "2026-11-25": { jee: { phy: "Ray Optics: Reflection", chem: "Benzene diazonium chloride, Basicity of amines", math: "Probability 1" } },
+      "2026-11-27": { jee: { phy: "Ray Optics: Reflection", chem: "Chemical Kinetics", math: "Probability 2" }, dpt: { chem: "Amines", math: "Indefinite Integration" } },
+      "2026-11-28": { jeeExam: "RPT-10 (300 Marks)" },
+      "2026-11-30": { jee: { phy: "Ray Optics: Refraction", chem: "D block", math: "Trigonometric Functions" } },
+      "2026-12-01": { jee: { phy: "Lens, Prism and Dispersion", chem: "F block", math: "Trigonometric Equations" }, dpt: { phy: "Semiconductor devices and electronics" } },
+      "2026-12-02": { jee: { phy: "Optical instruments", chem: "Alcohols", math: "Parabola" } },
+      "2026-12-03": { jee: { phy: "Wave optics", chem: "Phenols", math: "Parabola" }, dpt: { chem: "Chemical kinetics, Solutions & Electrochemistry", math: "Indefinite Integration" } },
+      "2026-12-04": { jee: { phy: "Dual nature", chem: "Ethers", math: "Parabola" } },
+      "2026-12-05": { jeeExam: "RPT-11 (300 Marks)" },
+      "2026-12-07": { jee: { phy: "Atoms", chem: "Electrochemistry", math: "Ellipse & Hyperbola" } },
+      "2026-12-09": { jee: { phy: "Atoms and Nuclei", chem: "Salt analysis", math: "Ellipse & Hyperbola" }, dpt: { phy: "Customised Portion 1" } },
+      "2026-12-10": { jee: { phy: "Semiconductors", chem: "Aldehydes & Ketones", math: "Revision" }, dpt: { chem: "D & F Block, Coordination Compounds, Biomolecules", math: "Definite Integration" } },
+      "2026-12-11": { jee: { phy: "Logic gates", chem: "Carboxylic acids", math: "Revision" } },
+      "2026-12-12": { jeeExam: "RPT-12 (300 Marks)" },
+      "2026-12-14": { boardExam: "PRE-BOARD CBSE EXAM 1: CHEMISTRY" },
+      "2026-12-15": { dpt: { phy: "Customised Portion 2" } },
+      "2026-12-16": { jee: { phy: "Revision", chem: "Revision", math: "Revision" } },
+      "2026-12-17": { jeeExam: "CPT-4 [RPT 10+11+12] (300 Marks)", dpt: { chem: "All Organic Lessons (4 lessons)", math: "Differential Equations" } },
+      "2026-12-18": { jee: { phy: "Revision", chem: "Revision", math: "Revision" } },
+      "2026-12-19": { boardExam: "PRE-BOARD CBSE EXAM 1: MATHEMATICS" },
+      "2026-12-21": { jeeExam: "FULL SYLLABUS TEST-1 (300 Marks)", dpt: { phy: "Customised Portion 3" } },
+      "2026-12-22": { jeeExam: "FULL SYLLABUS TEST-2 (300 Marks)" },
+      "2026-12-23": { dpt: { math: "Probability" } },
+      "2026-12-24": { holiday: "Christmas Holidays" },
+      "2026-12-25": { holiday: "Christmas Holidays" },
+      "2026-12-28": { jeeExam: "FULL SYLLABUS TEST-3 (300 Marks)" },
+      "2026-12-29": { jeeExam: "FULL SYLLABUS TEST-4 (300 Marks)", dpt: { phy: "Customised Portion 4" } },
+      "2026-12-31": { jeeExam: "FULL SYLLABUS TEST-5 (300 Marks)", dpt: { chem: "Numerical problems in Electrochemistry", math: "Linear Programming Problems" } },
+      "2027-01-01": { jeeExam: "FULL SYLLABUS TEST-6 (300 Marks)" },
+      "2027-01-04": { jeeExam: "FULL SYLLABUS TEST-7 (300 Marks)" },
+      "2027-01-05": { jeeExam: "FULL SYLLABUS TEST-8 (300 Marks)", dpt: { phy: "Customised Portion 5" } },
+      "2027-01-07": { jeeExam: "FULL SYLLABUS TEST-9 (300 Marks)", dpt: { chem: "Numerical problems in Solutions" } },
+      "2027-01-08": { jeeExam: "FULL SYLLABUS TEST-10 (300 Marks)" },
+      "2027-01-11": { jeeExam: "FULL SYLLABUS TEST-11 (300 Marks)" },
+      "2027-01-12": { jeeExam: "FULL SYLLABUS TEST-12 (300 Marks)", dpt: { phy: "Customised Portion 6" } },
+      "2027-01-14": { jeeExam: "FULL SYLLABUS TEST-13 (300 Marks)", dpt: { chem: "Numerical problems in Chemical Kinetics" } },
+      "2027-01-16": { holiday: "Pongal Holidays" },
+      "2027-01-17": { holiday: "Pongal Holidays" },
+      "2027-01-18": { jeeExam: "FULL SYLLABUS TEST-14 (300 Marks)" },
+      "2027-01-19": { jeeExam: "FULL SYLLABUS TEST-15 (300 Marks)" },
+      "2027-01-31": { jeeExam: "JEE MAINS SESSION 1 EXAMS WINDOW" }
+    };
+
+    const defaultHabits = [
+      { id: "h1", title: "Complete Today's JEE Physics Revision + 20 MCQs", tag: "JEE Physics" },
+      { id: "h2", title: "Complete Today's JEE Chemistry Revision + NCERT", tag: "JEE Chem" },
+      { id: "h3", title: "Complete Today's JEE Maths Practice + PYQs", tag: "JEE Maths" },
+      { id: "h4", title: "Prep / Revise for Next CBSE DPT Board Chapter", tag: "CBSE DPT" },
+      { id: "h5", title: "Update RPT/CPT Mistake & Formula Log (30 mins)", tag: "Revision" }
+    ];
+
+    let state = JSON.parse(localStorage.getItem("sngs_squad_v3")) || {
+      members: ["Gowthaman", "Abel"],
+      currentUser: localStorage.getItem("sngs_my_name") || "Gowthaman",
+      completions: {},
+      customGoals: {},
+      scores: []
+    };
+
+    async function syncFromCloud() {
+      try {
+        const res = await fetch(`${FIREBASE_DB_URL}/squadData.json`);
+        if (res.ok) {
+          const cloudData = await res.json();
+          if (cloudData) {
+            const savedName = localStorage.getItem("sngs_my_name") || state.currentUser;
+            state = {
+              members: cloudData.members || state.members,
+              currentUser: (cloudData.members && cloudData.members.includes(savedName)) ? savedName : (cloudData.members ? cloudData.members[0] : "Gowthaman"),
+              completions: cloudData.completions || {},
+              customGoals: cloudData.customGoals || {},
+              scores: cloudData.scores || []
+            };
+            localStorage.setItem("sngs_squad_v3", JSON.stringify(state));
+          } else {
+            await pushToCloud();
+          }
+          document.getElementById("syncStatus").textContent = "🟢 Live Cloud Synced";
+          renderAll();
+        }
+      } catch (e) {
+        document.getElementById("syncStatus").textContent = "🔴 Offline Mode";
+      }
+    }
+
+    async function pushToCloud() {
+      localStorage.setItem("sngs_squad_v3", JSON.stringify(state));
+      try {
+        await fetch(`${FIREBASE_DB_URL}/squadData.json`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            members: state.members,
+            completions: state.completions,
+            customGoals: state.customGoals,
+            scores: state.scores
+          })
+        });
+        document.getElementById("syncStatus").textContent = "🟢 Saved to Cloud";
+      } catch (e) {
+        document.getElementById("syncStatus").textContent = "🔴 Sync Error";
+      }
+    }
+
+    function switchUser() {
+      state.currentUser = document.getElementById("userSelect").value;
+      localStorage.setItem("sngs_my_name", state.currentUser);
+      renderAll();
+    }
+
+    function addFriend() {
+      const name = prompt("Enter friend's name to join the squad:");
+      if (!name || !name.trim()) return;
+      const clean = name.trim();
+      if (!state.members.includes(clean)) {
+        state.members.push(clean);
+      }
+      state.currentUser = clean;
+      localStorage.setItem("sngs_my_name", clean);
+      pushToCloud();
+      renderAll();
+    }
+
+    function changeDate(offset) {
+      const picker = document.getElementById("datePicker");
+      const d = new Date(picker.value + "T00:00:00");
+      d.setDate(d.getDate() + offset);
+      picker.value = d.toISOString().split("T")[0];
+      renderAll();
+    }
+
+    function getGoalsForDate(dateStr) {
+      return [...defaultHabits, ...((state.customGoals && state.customGoals[dateStr]) || [])];
+    }
+
+    function toggleHabit(dateStr, habitId) {
+      const u = state.currentUser;
+      if (!state.completions[u]) state.completions[u] = {};
+      if (!state.completions[u][dateStr]) state.completions[u][dateStr] = {};
+      state.completions[u][dateStr][habitId] = !state.completions[u][dateStr][habitId];
+      pushToCloud();
+      renderAll();
+    }
+
+    function addCustomGoal() {
+      const input = document.getElementById("customGoalInput");
+      const text = input.value.trim();
+      if (!text) return;
+      const dateStr = document.getElementById("datePicker").value;
+      if (!state.customGoals) state.customGoals = {};
+      if (!state.customGoals[dateStr]) state.customGoals[dateStr] = [];
+      state.customGoals[dateStr].push({ id: "c_" + Date.now(), title: text, tag: "Squad Goal" });
+      input.value = "";
+      pushToCloud();
+      renderAll();
+    }
+
+    function calcLiveScore() {
+      const p = (parseInt(document.getElementById("phyC").value)||0)*4 - (parseInt(document.getElementById("phyW").value)||0);
+      const c = (parseInt(document.getElementById("chemC").value)||0)*4 - (parseInt(document.getElementById("chemW").value)||0);
+      const m = (parseInt(document.getElementById("mathC").value)||0)*4 - (parseInt(document.getElementById("mathW").value)||0);
+      const total = p + c + m;
+      document.getElementById("liveTotalScore").textContent = `${total} / 300`;
+      return { p, c, m, total };
+    }
+
+    function saveTestScore() {
+      const exam = document.getElementById("examSelect").value;
+      const { p, c, m, total } = calcLiveScore();
+      if (!state.scores) state.scores = [];
+      state.scores.unshift({ user: state.currentUser, exam, phy: p, chem: c, math: m, total });
+      pushToCloud();
+      renderAll();
+    }
+
+    function renderAll() {
+      const sel = document.getElementById("userSelect");
+      sel.innerHTML = state.members.map(m => `<option value="${m}" ${m === state.currentUser ? 'selected' : ''}>${m}</option>`).join("");
+      document.getElementById("activeUserTitle").textContent = `${state.currentUser}'s`;
+      document.getElementById("chartUserLabel").textContent = state.currentUser;
+
+      const dateStr = document.getElementById("datePicker").value;
+      const dObj = new Date(dateStr + "T00:00:00");
+      const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      document.getElementById("dayBadge").textContent = days[dObj.getDay()];
+      document.getElementById("dateSubtext").textContent = dObj.toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
+
+      const entry = scheduleDB[dateStr] || {};
+      const jee = entry.jee || {};
+      document.getElementById("examAlertBadge").innerHTML = entry.jeeExam
+        ? `<span class="px-3 py-1 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-bold">🔥 ${entry.jeeExam}</span>`
+        : entry.boardExam
+        ? `<span class="px-3 py-1 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold">📝 ${entry.boardExam}</span>`
+        : entry.holiday
+        ? `<span class="px-3 py-1 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold">🎉 ${entry.holiday}</span>` : "";
+
+      document.getElementById("jeeScheduleCards").innerHTML = `
+        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700"><div class="text-xs font-bold text-sky-400">⚡ Physics</div><div class="text-sm text-white mt-0.5">${jee.phy || (entry.jeeExam ? entry.jeeExam : "Self-Revision / Problem Solving")}</div></div>
+        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700"><div class="text-xs font-bold text-amber-400">🧪 Chemistry</div><div class="text-sm text-white mt-0.5">${jee.chem || (entry.jeeExam ? entry.jeeExam : "Self-Revision / NCERT Recap")}</div></div>
+        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700"><div class="text-xs font-bold text-rose-400">📐 Maths</div><div class="text-sm text-white mt-0.5">${jee.math || (entry.jeeExam ? entry.jeeExam : "Self-Revision / PYQ Practice")}</div></div>
+      `;
+
+      const dptDiv = document.getElementById("dptScheduleCard");
+      if (entry.dpt) {
+        const parts = [];
+        if (entry.dpt.mon) parts.push(`<b>Mon CS/Eng:</b> ${entry.dpt.mon}`);
+        if (entry.dpt.phy) parts.push(`<b>Tue Physics DPT:</b> ${entry.dpt.phy}`);
+        if (entry.dpt.chem) parts.push(`<b>Thu Chem DPT:</b> ${entry.dpt.chem}`);
+        if (entry.dpt.math) parts.push(`<b>Thu Maths DPT:</b> ${entry.dpt.math}`);
+        dptDiv.innerHTML = `<span class="text-emerald-400 font-semibold">CBSE DPT Today:</span> ${parts.join(" • ")}`;
+      } else {
+        dptDiv.innerHTML = `<span class="text-slate-400 text-xs">No CBSE DPT exam today. Use your board slot to prep for this week's Mon/Tue/Thu single-chapter test.</span>`;
+      }
+
+      const goals = getGoalsForDate(dateStr);
+      const userDone = (state.completions && state.completions[state.currentUser] && state.completions[state.currentUser][dateStr]) || {};
+      let doneCount = 0;
+
+      document.getElementById("habitList").innerHTML = goals.map(g => {
+        const checked = !!userDone[g.id];
+        if (checked) doneCount++;
+        return `
+          <label class="flex items-center justify-between p-3 rounded-xl border ${checked ? 'bg-indigo-950/40 border-indigo-500/40' : 'bg-slate-800/60 border-slate-700'} cursor-pointer hover:border-slate-500 transition">
+            <div class="flex items-center gap-3">
+              <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleHabit('${dateStr}', '${g.id}')" class="w-4 h-4 accent-indigo-500">
+              <span class="text-sm ${checked ? 'line-through text-slate-400' : 'text-white font-medium'}">${g.title}</span>
+            </div>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-slate-700 text-slate-300">${g.tag}</span>
+          </label>
+        `;
+      }).join("");
+
+      const pct = goals.length ? Math.round((doneCount / goals.length) * 100) : 0;
+      document.getElementById("dailyProgressText").textContent = `${doneCount} / ${goals.length} (${pct}%)`;
+      document.getElementById("dailyProgressBar").style.width = `${pct}%`;
+
+      // Squad Leaderboard
+      const lb = state.members.map(m => {
+        const mDoneMap = (state.completions && state.completions[m] && state.completions[m][dateStr]) || {};
+        const count = goals.filter(g => mDoneMap[g.id]).length;
+        const mPct = goals.length ? Math.round((count / goals.length) * 100) : 0;
+        return { name: m, count, total: goals.length, pct: mPct };
+      }).sort((a, b) => b.pct - a.pct);
+
+      document.getElementById("squadLeaderboard").innerHTML = lb.map((item, idx) => `
+        <div onclick="document.getElementById('userSelect').value='${item.name}'; switchUser();" class="p-3 rounded-xl bg-slate-800/70 border ${item.name === state.currentUser ? 'border-indigo-500/70' : 'border-slate-700'} cursor-pointer">
+          <div class="flex justify-between text-xs font-semibold mb-1.5">
+            <span class="text-white">${idx === 0 && item.pct > 0 ? '👑 ' : ''}${item.name}</span>
+            <span class="text-indigo-300">${item.count}/${item.total} (${item.pct}%)</span>
+          </div>
+          <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden">
+            <div class="h-full bg-emerald-400 transition-all duration-300" style="width: ${item.pct}%"></div>
+          </div>
+        </div>
+      `).join("");
+
+      // Weekly Chart
+      const dayOfWeek = dObj.getDay();
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const monday = new Date(dObj);
+      monday.setDate(dObj.getDate() + mondayOffset);
+
+      let barsHTML = "", labelsHTML = "", weekSum = 0;
+      const shortDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+      for (let i = 0; i < 7; i++) {
+        const cur = new Date(monday);
+        cur.setDate(monday.getDate() + i);
+        const cStr = cur.toISOString().split("T")[0];
+        const gList = getGoalsForDate(cStr);
+        const cMap = (state.completions && state.completions[state.currentUser] && state.completions[state.currentUser][cStr]) || {};
+        const cDone = gList.filter(g => cMap[g.id]).length;
+        const cPct = gList.length ? Math.round((cDone / gList.length) * 100) : 0;
+        weekSum += cPct;
+
+        barsHTML += `
+          <div onclick="document.getElementById('datePicker').value='${cStr}'; renderAll();" class="flex flex-col items-center justify-end h-full cursor-pointer">
+            <span class="text-[10px] text-slate-400 mb-1">${cPct}%</span>
+            <div class="w-full max-w-[26px] bg-slate-800 rounded-t-lg h-24 flex items-end p-0.5 border ${cStr === dateStr ? 'border-indigo-400' : 'border-slate-700'}">
+              <div class="w-full rounded-t ${cPct >= 80 ? 'bg-emerald-400' : 'bg-indigo-400'}" style="height: ${Math.max(cPct, 6)}%"></div>
+            </div>
+          </div>`;
+        labelsHTML += `<div class="text-[11px] font-semibold ${cStr === dateStr ? 'text-indigo-400' : 'text-slate-300'}">${shortDays[i]}</div>`;
+      }
+      document.getElementById("weeklyChartBars").innerHTML = barsHTML;
+      document.getElementById("weeklyChartLabels").innerHTML = labelsHTML;
+      document.getElementById("weeklyAvgBadge").textContent = `${Math.round(weekSum / 7)}% Avg`;
+
+      // Streak
+      let streak = 0;
+      let cursor = new Date(dateStr + "T00:00:00");
+      while (true) {
+        const cStr = cursor.toISOString().split("T")[0];
+        const gList = getGoalsForDate(cStr);
+        const cMap = (state.completions && state.completions[state.currentUser] && state.completions[state.currentUser][cStr]) || {};
+        if (gList.some(g => cMap[g.id])) {
+          streak++;
+          cursor.setDate(cursor.getDate() - 1);
+        } else break;
+      }
+      document.getElementById("myStreakCount").textContent = `${streak} Days`;
+
+      // Upcoming Exams Radar
+      const upDates = Object.keys(scheduleDB).sort().filter(d => d >= dateStr && (scheduleDB[d].jeeExam || scheduleDB[d].boardExam || scheduleDB[d].dpt)).slice(0, 7);
+      document.getElementById("upcomingExamsList").innerHTML = upDates.map(d => {
+        const it = scheduleDB[d];
+        const tags = [];
+        if (it.jeeExam) tags.push(`<span class="text-rose-400 font-bold">🔥 ${it.jeeExam}</span>`);
+        if (it.boardExam) tags.push(`<span class="text-amber-400 font-bold">📝 ${it.boardExam}</span>`);
+        if (it.dpt) {
+          const arr = [it.dpt.mon, it.dpt.phy ? `Phy: ${it.dpt.phy}` : null, it.dpt.chem ? `Chem: ${it.dpt.chem}` : null, it.dpt.math ? `Math: ${it.dpt.math}` : null].filter(Boolean);
+          tags.push(`<span class="text-emerald-300">DPT: ${arr.join(" | ")}</span>`);
+        }
+        return `
+          <div onclick="document.getElementById('datePicker').value='${d}'; renderAll();" class="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700 hover:border-indigo-500/50 cursor-pointer text-xs">
+            <div class="text-[11px] text-slate-400 font-semibold mb-0.5">${d}</div>
+            <div class="space-y-0.5">${tags.map(t => `<div>${t}</div>`).join("")}</div>
+          </div>`;
+      }).join("");
+
+      // Scores
+      document.getElementById("scoreLogTable").innerHTML = (state.scores || []).map(s => `
+        <tr>
+          <td class="py-2 px-2 font-semibold text-white">${s.user}</td>
+          <td class="py-2 px-2 text-slate-300">${s.exam}</td>
+          <td class="py-2 px-2 text-sky-400">${s.phy}</td>
+          <td class="py-2 px-2 text-amber-400">${s.chem}</td>
+          <td class="py-2 px-2 text-rose-400">${s.math}</td>
+          <td class="py-2 px-2 font-bold text-emerald-400">${s.total} / 300</td>
+        </tr>
+      `).join("");
+    }
+
+    renderAll();
+    syncFromCloud();
+    setInterval(syncFromCloud, 12000); // Auto-sync every 12 seconds
+  </script>
+</body>
+</html>
