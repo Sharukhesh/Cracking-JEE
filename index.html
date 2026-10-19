@@ -3,75 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cracking JEE Squad | SNGS Academy 2026-27</title>
+  <title>Cracking JEE Squad Pro | SNGS Academy 2026-27</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
-    .glass { background: rgba(30, 41, 59, 0.78); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; background-color: #0b1120; color: #f8fafc; }
+    .glass { background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
     .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scroll::-webkit-scrollbar-track { background: #1e293b; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    @keyframes pulse-slow { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+    .live-pulse { animation: pulse-slow 2s infinite; }
   </style>
 </head>
-<body class="min-h-screen p-4 md:p-6">
+<body class="min-h-screen p-3 md:p-6">
 
-  <div class="max-w-7xl mx-auto space-y-6">
+  <div class="max-w-7xl mx-auto space-y-5">
 
-    <!-- Top Squad Bar -->
-    <div class="glass rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-l-4 border-indigo-500">
-      <div class="flex flex-wrap items-center gap-3">
-        <span class="text-xs font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full">👥 Cracking JEE Squad</span>
+    <!-- 1. Top Squad Bar & Live Study Status Feed -->
+    <div class="glass rounded-2xl p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-l-4 border-indigo-500">
+      <div class="flex flex-wrap items-center gap-2.5">
+        <span class="text-xs font-extrabold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30">👥 JEE Squad Pro</span>
         <div class="flex items-center gap-2">
-          <label class="text-xs text-slate-400">Logging as:</label>
+          <label class="text-xs text-slate-400">Member:</label>
           <select id="userSelect" onchange="switchUser()" class="bg-slate-800 border border-slate-600 text-white text-sm font-semibold rounded-xl px-3 py-1.5 focus:outline-none focus:border-indigo-400"></select>
           <button onclick="addFriend()" class="bg-indigo-600 hover:bg-indigo-500 text-xs text-white font-semibold px-3 py-1.5 rounded-xl transition">+ Add</button>
           <button onclick="removeCurrentMember()" class="bg-rose-600/80 hover:bg-rose-600 text-xs text-white font-semibold px-3 py-1.5 rounded-xl transition">- Remove</button>
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
-        <span id="syncStatus" class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">🟢 Connecting...</span>
+      <!-- Live Studying Room Status -->
+      <div id="liveStudyBanner" class="flex flex-wrap items-center gap-2 text-xs"></div>
+
+      <div class="flex items-center gap-2 self-end lg:self-auto">
+        <span id="syncStatus" class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">🟢 Synced</span>
         <button onclick="syncFromCloud()" class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-600 px-3 py-1 rounded-xl text-slate-300">↻ Refresh</button>
       </div>
     </div>
 
-    <!-- Header -->
-    <header class="glass rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <!-- 2. Live Exam Countdown Banner -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="countdownBanners"></div>
+
+    <!-- 3. Main Header & Date Navigator -->
+    <header class="glass rounded-2xl p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div>
-        <h1 class="text-2xl md:text-3xl font-bold text-white">SNGS JEE Mains & Board Squad Dashboard</h1>
-        <p class="text-slate-400 text-sm mt-0.5">Live Squad Habit Tracker • RPT/CPT (+4/-1) 300-Mark Logger • Mon/Tue/Thu CBSE DPTs</p>
+        <div class="flex flex-wrap items-center gap-2 mb-1">
+          <h1 class="text-2xl md:text-3xl font-extrabold text-white">SNGS JEE & CBSE Command Center</h1>
+          <span id="userRankBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">🌱 JEE Aspirant</span>
+        </div>
+        <p class="text-slate-400 text-xs md:text-sm">Live Habits • 300-Mark (+4/-1) Analytics • Pomodoro Study Room • Squad Mistake Wall</p>
       </div>
 
-      <div class="flex flex-wrap items-center gap-4">
-        <div class="flex items-center gap-3 bg-slate-800/90 border border-slate-700 px-4 py-2 rounded-xl">
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-center gap-2.5 bg-slate-800/90 border border-slate-700 px-3.5 py-2 rounded-xl">
           <span class="text-2xl">🔥</span>
           <div>
-            <div class="text-[11px] text-slate-400 uppercase font-semibold">Active Streak</div>
-            <div class="text-lg font-bold text-amber-400" id="myStreakCount">0 Days</div>
+            <div class="text-[10px] text-slate-400 uppercase font-semibold">Active Streak</div>
+            <div class="text-base font-bold text-amber-400" id="myStreakCount">0 Days</div>
           </div>
         </div>
 
         <div>
-          <label class="text-[11px] text-slate-400 block mb-1">Schedule Date:</label>
+          <label class="text-[10px] text-slate-400 uppercase font-semibold block mb-1">Schedule Date:</label>
           <div class="flex items-center gap-1">
             <button onclick="changeDate(-1)" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-xs">◀</button>
-            <input type="date" id="datePicker" onchange="renderAll()" class="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg px-3 py-1.5" value="2026-10-19" min="2026-08-31" max="2027-02-15">
+            <input type="date" id="datePicker" onchange="renderAll()" class="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg px-2.5 py-1.5" value="2026-10-19" min="2026-08-31" max="2027-02-15">
             <button onclick="changeDate(1)" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-xs">▶</button>
           </div>
         </div>
       </div>
     </header>
 
-    <!-- Main Grid -->
+    <!-- Main 3-Column Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
       <!-- Left 2 Columns -->
       <div class="lg:col-span-2 space-y-6">
 
         <!-- Today's Timetable -->
-        <section class="glass rounded-2xl p-6">
-          <div class="flex items-center justify-between mb-4">
+        <section class="glass rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-3">
             <div>
               <h2 class="text-lg font-bold text-white flex items-center gap-2">
                 📅 Daily Timetable & Exam Sync
@@ -89,12 +100,12 @@
           <div id="dptScheduleCard" class="p-3.5 rounded-xl bg-slate-800/70 border border-slate-700/80 text-sm"></div>
         </section>
 
-        <!-- Daily Habit Checklist -->
-        <section class="glass rounded-2xl p-6">
+        <!-- Daily Habit Checklist (With Delete for Custom Goals) -->
+        <section class="glass rounded-2xl p-5">
           <div class="flex items-center justify-between mb-3">
             <div>
               <h2 class="text-lg font-bold text-white">✅ <span id="activeUserTitle">My</span> Daily Goals</h2>
-              <p class="text-xs text-slate-400">Checking these off updates the Squad Leaderboard for everyone!</p>
+              <p class="text-xs text-slate-400">Check off daily tasks to climb the Squad Leaderboard & earn badges.</p>
             </div>
             <span class="text-sm font-bold text-indigo-400" id="dailyProgressText">0 / 5 (0%)</span>
           </div>
@@ -103,18 +114,22 @@
             <div id="dailyProgressBar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-300" style="width: 0%"></div>
           </div>
 
-          <div class="space-y-2.5 mb-4" id="habitList"></div>
+          <div class="space-y-2 mb-4" id="habitList"></div>
 
           <div class="flex gap-2">
-            <input type="text" id="customGoalInput" placeholder="Add a shared squad goal for this date..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white">
-            <button onclick="addCustomGoal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm px-4 py-2 rounded-xl">Add Goal</button>
+            <input type="text" id="customGoalInput" placeholder="Add a custom squad goal for this date..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white">
+            <button onclick="addCustomGoal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs md:text-sm px-4 py-2 rounded-xl">+ Add Goal</button>
           </div>
         </section>
 
-        <!-- Squad RPT / CPT Score Logger -->
-        <section class="glass rounded-2xl p-6">
-          <h2 class="text-lg font-bold text-white mb-1">🎯 Squad RPT / CPT / FST Scoreboard (300 Marks | +4 / -1)</h2>
-          <p class="text-xs text-slate-400 mb-4">Enter Correct (+4) and Wrong (-1) questions to log your score.</p>
+        <!-- Squad RPT / CPT Score Logger + Visual Trend Graph -->
+        <section class="glass rounded-2xl p-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <div>
+              <h2 class="text-lg font-bold text-white">🎯 Squad 300-Mark Scoreboard & Trend Graph</h2>
+              <p class="text-xs text-slate-400">Enter Correct (+4) and Wrong (-1) questions to log your score & accuracy.</p>
+            </div>
+          </div>
 
           <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
             <div class="md:col-span-2">
@@ -141,8 +156,8 @@
             </div>
             <div class="md:col-span-2 flex items-end">
               <div class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 flex justify-between items-center">
-                <span class="text-xs text-slate-400">Calculated Total:</span>
-                <span id="liveTotalScore" class="text-lg font-bold text-indigo-400">0 / 300</span>
+                <span class="text-xs text-slate-400">Net Score:</span>
+                <span id="liveTotalScore" class="text-lg font-bold text-indigo-400">0 / 300 (0%)</span>
               </div>
             </div>
           </div>
@@ -171,8 +186,15 @@
             </div>
           </div>
 
-          <button onclick="saveTestScore()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm py-2.5 rounded-xl transition mb-4">Post My Score to Squad Board</button>
+          <button onclick="saveTestScore()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm py-2.5 rounded-xl transition mb-5">Post My Score to Squad Board</button>
 
+          <!-- Visual Score Trend Bar Chart -->
+          <div class="mb-5 p-4 rounded-xl bg-slate-900/70 border border-slate-800">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">📈 Visual Score Progression (/300 Marks)</div>
+            <div id="scoreTrendChart" class="flex items-end gap-3 h-32 pt-4 overflow-x-auto custom-scroll pb-2"></div>
+          </div>
+
+          <!-- Score History Table with Delete -->
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-xs">
               <thead>
@@ -182,28 +204,85 @@
                   <th class="py-2 px-2">Phy</th>
                   <th class="py-2 px-2">Chem</th>
                   <th class="py-2 px-2">Maths</th>
-                  <th class="py-2 px-2">Total (/300)</th>
+                  <th class="py-2 px-2">Total</th>
+                  <th class="py-2 px-2">Acc</th>
+                  <th class="py-2 px-1 text-right">Del</th>
                 </tr>
               </thead>
               <tbody id="scoreLogTable" class="divide-y divide-slate-800"></tbody>
             </table>
           </div>
         </section>
+
+        <!-- Shared Squad Mistake & Doubt Wall -->
+        <section class="glass rounded-2xl p-5">
+          <h2 class="text-lg font-bold text-white mb-1">📓 Squad Mistake, Formula & Doubt Wall</h2>
+          <p class="text-xs text-slate-400 mb-3">Post tricky RPT/CPT concepts, negative-marking traps, or formulas so the whole squad remembers them!</p>
+
+          <div class="flex flex-col sm:flex-row gap-2 mb-4">
+            <select id="noteSubject" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+              <option value="⚡ Physics">⚡ Physics</option>
+              <option value="🧪 Chemistry">🧪 Chemistry</option>
+              <option value="📐 Maths">📐 Maths</option>
+              <option value="📝 CBSE DPT">📝 CBSE DPT</option>
+            </select>
+            <input type="text" id="noteInput" placeholder="Share a key formula, RPT trap, or doubt..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white">
+            <button onclick="addSquadNote()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs px-4 py-2 rounded-xl">Post Note</button>
+          </div>
+
+          <div id="squadNotesList" class="space-y-2.5 max-h-64 overflow-y-auto custom-scroll pr-1"></div>
+        </section>
+
       </div>
 
       <!-- Right Column -->
       <div class="space-y-6">
 
-        <section class="glass rounded-2xl p-6">
+        <!-- Live Pomodoro & 3-Hr Mock Timer -->
+        <section class="glass rounded-2xl p-5 border border-indigo-500/30">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-lg font-bold text-white">⏱️ Live Squad Study Timer</h2>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-semibold">Broadcasts Live</span>
+          </div>
+          <p class="text-xs text-slate-400 mb-3">Start a timer to show your friends you're locked in right now:</p>
+
+          <div class="grid grid-cols-3 gap-1.5 mb-3">
+            <button onclick="setTimerPreset(50, 'JEE 50m Sprint')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg py-1.5 text-xs font-semibold text-indigo-300">50m Sprint</button>
+            <button onclick="setTimerPreset(25, '25m Pomodoro')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg py-1.5 text-xs font-semibold text-emerald-300">25m Focus</button>
+            <button onclick="setTimerPreset(180, '3Hr RPT/CPT Mock')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg py-1.5 text-xs font-semibold text-rose-300">3Hr Mock</button>
+          </div>
+
+          <select id="studyTopicSelect" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white mb-3">
+            <option value="Solving Physics PYQs ⚡">Solving Physics PYQs ⚡</option>
+            <option value="Revising Chemistry NCERT 🧪">Revising Chemistry NCERT 🧪</option>
+            <option value="Practicing Maths Problems 📐">Practicing Maths Problems 📐</option>
+            <option value="Prepping for CBSE DPT 📝">Prepping for CBSE DPT 📝</option>
+            <option value="Attempting RPT / CPT Mock 🔥">Attempting RPT / CPT Mock 🔥</option>
+          </select>
+
+          <div class="text-center py-3 bg-slate-900/90 rounded-xl border border-slate-800 mb-3">
+            <div id="timerDisplay" class="text-3xl font-extrabold tracking-wider text-white font-mono">50:00</div>
+            <div id="timerModeLabel" class="text-[11px] text-slate-400 mt-0.5">Ready to start</div>
+          </div>
+
+          <div class="flex gap-2">
+            <button id="timerStartBtn" onclick="toggleTimer()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 rounded-xl transition">▶ Start Studying</button>
+            <button onclick="resetTimer()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-semibold text-xs px-4 py-2.5 rounded-xl">Reset</button>
+          </div>
+        </section>
+
+        <!-- Squad Leaderboard with Gamified Badges -->
+        <section class="glass rounded-2xl p-5">
           <div class="flex items-center justify-between mb-2">
             <h2 class="text-lg font-bold text-white">🏆 Squad Daily Leaderboard</h2>
             <span class="text-[11px] text-emerald-400 font-semibold">Real-Time</span>
           </div>
-          <p class="text-xs text-slate-400 mb-4">Daily goal completion across the squad:</p>
+          <p class="text-xs text-slate-400 mb-4">Click any member to inspect their streak:</p>
           <div class="space-y-3" id="squadLeaderboard"></div>
         </section>
 
-        <section class="glass rounded-2xl p-6">
+        <!-- Weekly Streak Chart -->
+        <section class="glass rounded-2xl p-5">
           <div class="flex items-center justify-between mb-4">
             <div>
               <h2 class="text-lg font-bold text-white">📊 Weekly Streak Chart</h2>
@@ -215,10 +294,11 @@
           <div class="grid grid-cols-7 gap-2 text-center mt-2" id="weeklyChartLabels"></div>
         </section>
 
-        <section class="glass rounded-2xl p-6">
+        <!-- Upcoming Exam Radar -->
+        <section class="glass rounded-2xl p-5">
           <h2 class="text-lg font-bold text-white mb-1">🚀 Upcoming Exam Radar</h2>
-          <p class="text-xs text-slate-400 mb-3">Click any test to jump to that date:</p>
-          <div class="space-y-2 max-h-72 overflow-y-auto custom-scroll pr-1" id="upcomingExamsList"></div>
+          <p class="text-xs text-slate-400 mb-3">Click any upcoming test to jump to that date:</p>
+          <div class="space-y-2 max-h-64 overflow-y-auto custom-scroll pr-1" id="upcomingExamsList"></div>
         </section>
 
       </div>
@@ -228,6 +308,7 @@
   <script>
     const FIREBASE_DB_URL = "https://cracking-jee-default-rtdb.firebaseio.com";
 
+    // Full SNGS Academy JEE + CBSE Board DPT Schedule (Biology Excluded)
     const scheduleDB = {
       "2026-08-31": { dpt: { mon: "English / C.S: Unit Test 1" } },
       "2026-09-01": { jee: { phy: "Units and dimensions", chem: "Mole concept, Stoichiometry", math: "Logarithms & Inequalities" }, dpt: { phy: "Electric charges and fields" } },
@@ -249,7 +330,7 @@
       "2026-09-21": { jee: { phy: "Revision", chem: "Revision", math: "Area under Curves" } },
       "2026-09-22": { jee: { phy: "Revision", chem: "Revision", math: "Quadratic Equations" }, dpt: { phy: "Moving charges and Magnetism" } },
       "2026-09-23": { jee: { phy: "Revision", chem: "Revision", math: "Complex Numbers" } },
-      "2026-09-24": { jee: { phy: "Revision", chem: "Revision", math: "Application of Integration" }, dpt: { chem: "Solutions", math: "Application of Integration" } },
+      "2026-09-24": { jee: { phy: "Revision", chem: "Revision", math: "Complex Numbers" }, dpt: { chem: "Solutions", math: "Application of Integration" } },
       "2026-09-25": { jee: { phy: "Revision", chem: "Revision", math: "Revision" } },
       "2026-09-26": { jeeExam: "CPT-1 [RPT 1+2+3] (300 Marks)" },
       "2026-09-28": { jee: { phy: "System of particles", chem: "P-block elements", math: "Sequence & Series" }, dpt: { mon: "English / C.S: Unit Test 2" } },
@@ -353,13 +434,21 @@
       { id: "h5", title: "Update RPT/CPT Mistake & Formula Log (30 mins)", tag: "Revision" }
     ];
 
-    let state = JSON.parse(localStorage.getItem("sngs_squad_v4")) || {
-      members: ["Abel"],
-      currentUser: "Abel",
+    let state = JSON.parse(localStorage.getItem("sngs_squad_v5")) || {
+      members: ["Sharukhesh", "Abel"],
+      currentUser: localStorage.getItem("sngs_my_user") || "Sharukhesh",
       completions: {},
       customGoals: {},
-      scores: []
+      scores: [],
+      notes: [],
+      activeSessions: {}
     };
+
+    // Timer local variables
+    let timerSeconds = 50 * 60;
+    let timerInitialMinutes = 50;
+    let timerInterval = null;
+    let timerRunning = false;
 
     async function syncFromCloud() {
       try {
@@ -367,17 +456,22 @@
         if (res.ok) {
           const cloudData = await res.json();
           if (cloudData && cloudData.members) {
+            const savedUser = localStorage.getItem("sngs_my_user");
             state.members = cloudData.members;
             state.completions = cloudData.completions || {};
             state.customGoals = cloudData.customGoals || {};
             state.scores = cloudData.scores || [];
-            if (!state.members.includes(state.currentUser)) {
-              state.currentUser = state.members[0] || "Abel";
+            state.notes = cloudData.notes || [];
+            state.activeSessions = cloudData.activeSessions || {};
+            if (savedUser && state.members.includes(savedUser)) {
+              state.currentUser = savedUser;
+            } else if (!state.members.includes(state.currentUser)) {
+              state.currentUser = state.members[0];
             }
           } else {
             await pushToCloud();
           }
-          document.getElementById("syncStatus").textContent = "🟢 Synced";
+          document.getElementById("syncStatus").textContent = "🟢 Live Synced";
           renderAll();
         }
       } catch (e) {
@@ -386,7 +480,7 @@
     }
 
     async function pushToCloud() {
-      localStorage.setItem("sngs_squad_v4", JSON.stringify(state));
+      localStorage.setItem("sngs_squad_v5", JSON.stringify(state));
       try {
         await fetch(`${FIREBASE_DB_URL}/squadData.json`, {
           method: "PUT",
@@ -395,10 +489,12 @@
             members: state.members,
             completions: state.completions,
             customGoals: state.customGoals,
-            scores: state.scores
+            scores: state.scores,
+            notes: state.notes,
+            activeSessions: state.activeSessions
           })
         });
-        document.getElementById("syncStatus").textContent = "🟢 Synced";
+        document.getElementById("syncStatus").textContent = "🟢 Saved";
       } catch (e) {
         document.getElementById("syncStatus").textContent = "🔴 Error";
       }
@@ -406,34 +502,30 @@
 
     function switchUser() {
       state.currentUser = document.getElementById("userSelect").value;
+      localStorage.setItem("sngs_my_user", state.currentUser);
       renderAll();
     }
 
     function addFriend() {
-      const name = prompt("Enter new member name:");
+      const name = prompt("Enter squad member name:");
       if (!name || !name.trim()) return;
       const clean = name.trim();
-      if (!state.members.includes(clean)) {
-        state.members.push(clean);
-      }
+      if (!state.members.includes(clean)) state.members.push(clean);
       state.currentUser = clean;
+      localStorage.setItem("sngs_my_user", clean);
       pushToCloud();
       renderAll();
     }
 
     function removeCurrentMember() {
-      if (state.members.length <= 1) {
-        alert("You cannot remove the last remaining member!");
-        return;
-      }
-      const current = state.currentUser;
-      if (confirm(`Are you sure you want to remove "${current}" from the squad?`)) {
-        // Remove from members list
-        state.members = state.members.filter(m => m !== current);
-        // Clean up their completion data
-        if (state.completions[current]) delete state.completions[current];
-        // Switch to the first available member
+      if (state.members.length <= 1) return alert("Cannot remove the last remaining member!");
+      const cur = state.currentUser;
+      if (confirm(`Remove "${cur}" from the squad?`)) {
+        state.members = state.members.filter(m => m !== cur);
+        if (state.completions[cur]) delete state.completions[cur];
+        if (state.activeSessions && state.activeSessions[cur]) delete state.activeSessions[cur];
         state.currentUser = state.members[0];
+        localStorage.setItem("sngs_my_user", state.currentUser);
         pushToCloud();
         renderAll();
       }
@@ -467,28 +559,225 @@
       const dateStr = document.getElementById("datePicker").value;
       if (!state.customGoals) state.customGoals = {};
       if (!state.customGoals[dateStr]) state.customGoals[dateStr] = [];
-      state.customGoals[dateStr].push({ id: "c_" + Date.now(), title: text, tag: "Squad Goal" });
+      state.customGoals[dateStr].push({ id: "c_" + Date.now(), title: text, tag: "Squad Goal", custom: true });
       input.value = "";
       pushToCloud();
       renderAll();
     }
 
+    function deleteCustomGoal(dateStr, goalId) {
+      if (!state.customGoals || !state.customGoals[dateStr]) return;
+      state.customGoals[dateStr] = state.customGoals[dateStr].filter(g => g.id !== goalId);
+      pushToCloud();
+      renderAll();
+    }
+
+    // Score Calculator & Delete
     function calcLiveScore() {
-      const p = (parseInt(document.getElementById("phyC").value)||0)*4 - (parseInt(document.getElementById("phyW").value)||0);
-      const c = (parseInt(document.getElementById("chemC").value)||0)*4 - (parseInt(document.getElementById("chemW").value)||0);
-      const m = (parseInt(document.getElementById("mathC").value)||0)*4 - (parseInt(document.getElementById("mathW").value)||0);
+      const pC = parseInt(document.getElementById("phyC").value)||0;
+      const pW = parseInt(document.getElementById("phyW").value)||0;
+      const cC = parseInt(document.getElementById("chemC").value)||0;
+      const cW = parseInt(document.getElementById("chemW").value)||0;
+      const mC = parseInt(document.getElementById("mathC").value)||0;
+      const mW = parseInt(document.getElementById("mathW").value)||0;
+
+      const p = pC * 4 - pW;
+      const c = cC * 4 - cW;
+      const m = mC * 4 - mW;
       const total = p + c + m;
-      document.getElementById("liveTotalScore").textContent = `${total} / 300`;
-      return { p, c, m, total };
+      const totAtt = pC + pW + cC + cW + mC + mW;
+      const acc = totAtt > 0 ? Math.round(((pC + cC + mC) / totAtt) * 100) : 0;
+
+      document.getElementById("liveTotalScore").textContent = `${total} / 300 (${acc}% Acc)`;
+      return { p, c, m, total, acc };
     }
 
     function saveTestScore() {
       const exam = document.getElementById("examSelect").value;
-      const { p, c, m, total } = calcLiveScore();
+      const { p, c, m, total, acc } = calcLiveScore();
       if (!state.scores) state.scores = [];
-      state.scores.unshift({ user: state.currentUser, exam, phy: p, chem: c, math: m, total });
+      state.scores.unshift({ id: "s_" + Date.now(), user: state.currentUser, exam, phy: p, chem: c, math: m, total, acc: acc + "%" });
       pushToCloud();
       renderAll();
+    }
+
+    function deleteScore(scoreId) {
+      state.scores = (state.scores || []).filter(s => s.id !== scoreId);
+      pushToCloud();
+      renderAll();
+    }
+
+    // Mistake Wall
+    function addSquadNote() {
+      const subj = document.getElementById("noteSubject").value;
+      const input = document.getElementById("noteInput");
+      const text = input.value.trim();
+      if (!text) return;
+      if (!state.notes) state.notes = [];
+      state.notes.unshift({
+        id: "n_" + Date.now(),
+        user: state.currentUser,
+        subj,
+        text,
+        time: new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short" })
+      });
+      input.value = "";
+      pushToCloud();
+      renderAll();
+    }
+
+    function deleteSquadNote(noteId) {
+      state.notes = (state.notes || []).filter(n => n.id !== noteId);
+      pushToCloud();
+      renderAll();
+    }
+
+    // Live Pomodoro Study Timer
+    function setTimerPreset(mins, label) {
+      if (timerRunning) toggleTimer();
+      timerInitialMinutes = mins;
+      timerSeconds = mins * 60;
+      document.getElementById("timerModeLabel").textContent = label;
+      updateTimerUI();
+    }
+
+    function updateTimerUI() {
+      const m = Math.floor(timerSeconds / 60);
+      const s = timerSeconds % 60;
+      document.getElementById("timerDisplay").textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById("timerStartBtn");
+      const topic = document.getElementById("studyTopicSelect").value;
+      if (!state.activeSessions) state.activeSessions = {};
+
+      if (!timerRunning) {
+        timerRunning = true;
+        btn.textContent = "⏸ Pause Session";
+        btn.className = "flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-2.5 rounded-xl transition";
+        state.activeSessions[state.currentUser] = {
+          topic,
+          endTime: Date.now() + timerSeconds * 1000
+        };
+        pushToCloud();
+
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds--;
+            updateTimerUI();
+          } else {
+            resetTimer();
+            alert("🎉 Study session complete! Great work!");
+          }
+        }, 1000);
+      } else {
+        timerRunning = false;
+        clearInterval(timerInterval);
+        btn.textContent = "▶ Resume Studying";
+        btn.className = "flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 rounded-xl transition";
+        if (state.activeSessions[state.currentUser]) delete state.activeSessions[state.currentUser];
+        pushToCloud();
+      }
+      renderLiveStudyBanner();
+    }
+
+    function resetTimer() {
+      timerRunning = false;
+      clearInterval(timerInterval);
+      timerSeconds = timerInitialMinutes * 60;
+      updateTimerUI();
+      const btn = document.getElementById("timerStartBtn");
+      btn.textContent = "▶ Start Studying";
+      btn.className = "flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 rounded-xl transition";
+      if (state.activeSessions && state.activeSessions[state.currentUser]) {
+        delete state.activeSessions[state.currentUser];
+        pushToCloud();
+      }
+      renderLiveStudyBanner();
+    }
+
+    function renderLiveStudyBanner() {
+      const container = document.getElementById("liveStudyBanner");
+      const sessions = state.activeSessions || {};
+      const now = Date.now();
+      const activeList = Object.keys(sessions).filter(u => sessions[u] && sessions[u].endTime > now);
+
+      if (activeList.length === 0) {
+        container.innerHTML = `<span class="text-slate-400">💤 No one in the study room right now. Start the timer to lock in!</span>`;
+      } else {
+        container.innerHTML = activeList.map(u => {
+          const minsLeft = Math.max(1, Math.ceil((sessions[u].endTime - now) / 60000));
+          return `<span class="live-pulse px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-semibold">🟢 <b>${u}</b>: ${sessions[u].topic} (${minsLeft}m left)</span>`;
+        }).join("");
+      }
+    }
+
+    function getMemberStreak(memberName, refDateStr) {
+      let streak = 0;
+      let cursor = new Date(refDateStr + "T00:00:00");
+      while (true) {
+        const cStr = cursor.toISOString().split("T")[0];
+        const gList = getGoalsForDate(cStr);
+        const cMap = (state.completions && state.completions[memberName] && state.completions[memberName][cStr]) || {};
+        if (gList.some(g => cMap[g.id])) {
+          streak++;
+          cursor.setDate(cursor.getDate() - 1);
+        } else break;
+      }
+      return streak;
+    }
+
+    function getBadgeForMember(memberName, streak) {
+      const userScores = (state.scores || []).filter(s => s.user === memberName);
+      const bestScore = userScores.reduce((max, s) => Math.max(max, s.total || 0), 0);
+      if (bestScore >= 220) return "👑 220+ Club Legend";
+      if (streak >= 7) return "🔥 7-Day Streak Master";
+      if (bestScore >= 160) return "🎯 RPT Sniper";
+      if (streak >= 3) return "⚡ Momentum Builder";
+      return "🌱 JEE Aspirant";
+    }
+
+    function renderCountdowns(dateStr) {
+      const cur = new Date(dateStr + "T00:00:00");
+      const allDates = Object.keys(scheduleDB).sort();
+      const nextExamDate = allDates.find(d => d >= dateStr && scheduleDB[d].jeeExam) || "2026-10-24";
+      const nextExamName = (scheduleDB[nextExamDate] && scheduleDB[nextExamDate].jeeExam) || "Next RPT/CPT";
+
+      const diffDays = (targetStr) => Math.max(0, Math.ceil((new Date(targetStr + "T00:00:00") - cur) / 86400000));
+
+      document.getElementById("countdownBanners").innerHTML = `
+        <div class="glass rounded-xl p-3.5 flex items-center justify-between border-l-4 border-rose-500">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-rose-400">Next JEE Test</div>
+            <div class="text-sm font-bold text-white truncate max-w-[180px]">${nextExamName}</div>
+          </div>
+          <div class="text-right">
+            <div class="text-xl font-extrabold text-rose-300">${diffDays(nextExamDate)}d</div>
+            <div class="text-[10px] text-slate-400">${nextExamDate}</div>
+          </div>
+        </div>
+        <div class="glass rounded-xl p-3.5 flex items-center justify-between border-l-4 border-amber-500">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-amber-400">CBSE Pre-Board 1</div>
+            <div class="text-sm font-bold text-white">Physics Pre-Board</div>
+          </div>
+          <div class="text-right">
+            <div class="text-xl font-extrabold text-amber-300">${diffDays("2026-11-16")}d</div>
+            <div class="text-[10px] text-slate-400">16 Nov 2026</div>
+          </div>
+        </div>
+        <div class="glass rounded-xl p-3.5 flex items-center justify-between border-l-4 border-indigo-500">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-indigo-400">Final Target</div>
+            <div class="text-sm font-bold text-white">JEE Mains Session 1</div>
+          </div>
+          <div class="text-right">
+            <div class="text-xl font-extrabold text-indigo-300">${diffDays("2027-01-31")}d</div>
+            <div class="text-[10px] text-slate-400">31 Jan 2027</div>
+          </div>
+        </div>
+      `;
     }
 
     function renderAll() {
@@ -503,6 +792,10 @@
       document.getElementById("dayBadge").textContent = days[dObj.getDay()];
       document.getElementById("dateSubtext").textContent = dObj.toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
 
+      renderCountdowns(dateStr);
+      renderLiveStudyBanner();
+
+      // Schedule
       const entry = scheduleDB[dateStr] || {};
       const jee = entry.jee || {};
       document.getElementById("examAlertBadge").innerHTML = entry.jeeExam
@@ -530,6 +823,7 @@
         dptDiv.innerHTML = `<span class="text-slate-400 text-xs">No CBSE DPT exam today. Use your board slot to prep for this week's single-chapter test.</span>`;
       }
 
+      // Habits List
       const goals = getGoalsForDate(dateStr);
       const userDone = (state.completions && state.completions[state.currentUser] && state.completions[state.currentUser][dateStr]) || {};
       let doneCount = 0;
@@ -538,13 +832,16 @@
         const checked = !!userDone[g.id];
         if (checked) doneCount++;
         return `
-          <label class="flex items-center justify-between p-3 rounded-xl border ${checked ? 'bg-indigo-950/40 border-indigo-500/40' : 'bg-slate-800/60 border-slate-700'} cursor-pointer hover:border-slate-500 transition">
-            <div class="flex items-center gap-3">
+          <div class="flex items-center justify-between p-3 rounded-xl border ${checked ? 'bg-indigo-950/40 border-indigo-500/40' : 'bg-slate-800/60 border-slate-700'} transition">
+            <label class="flex items-center gap-3 flex-1 cursor-pointer">
               <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleHabit('${dateStr}', '${g.id}')" class="w-4 h-4 accent-indigo-500">
               <span class="text-sm ${checked ? 'line-through text-slate-400' : 'text-white font-medium'}">${g.title}</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] px-2 py-0.5 rounded bg-slate-700 text-slate-300">${g.tag}</span>
+              ${g.custom ? `<button onclick="deleteCustomGoal('${dateStr}', '${g.id}')" class="text-rose-400 hover:text-rose-300 font-bold px-1.5 text-xs">✕</button>` : ''}
             </div>
-            <span class="text-[11px] px-2 py-0.5 rounded bg-slate-700 text-slate-300">${g.tag}</span>
-          </label>
+          </div>
         `;
       }).join("");
 
@@ -552,20 +849,27 @@
       document.getElementById("dailyProgressText").textContent = `${doneCount} / ${goals.length} (${pct}%)`;
       document.getElementById("dailyProgressBar").style.width = `${pct}%`;
 
+      // Streak & Rank Badge
+      const myStreak = getMemberStreak(state.currentUser, dateStr);
+      document.getElementById("myStreakCount").textContent = `${myStreak} Days`;
+      document.getElementById("userRankBadge").textContent = getBadgeForMember(state.currentUser, myStreak);
+
       // Squad Leaderboard
       const lb = state.members.map(m => {
         const mDoneMap = (state.completions && state.completions[m] && state.completions[m][dateStr]) || {};
         const count = goals.filter(g => mDoneMap[g.id]).length;
         const mPct = goals.length ? Math.round((count / goals.length) * 100) : 0;
-        return { name: m, count, total: goals.length, pct: mPct };
+        const mStreak = getMemberStreak(m, dateStr);
+        return { name: m, count, total: goals.length, pct: mPct, badge: getBadgeForMember(m, mStreak) };
       }).sort((a, b) => b.pct - a.pct);
 
       document.getElementById("squadLeaderboard").innerHTML = lb.map((item, idx) => `
         <div onclick="document.getElementById('userSelect').value='${item.name}'; switchUser();" class="p-3 rounded-xl bg-slate-800/70 border ${item.name === state.currentUser ? 'border-indigo-500/70' : 'border-slate-700'} cursor-pointer">
-          <div class="flex justify-between text-xs font-semibold mb-1.5">
+          <div class="flex justify-between items-center text-xs font-semibold mb-1">
             <span class="text-white">${idx === 0 && item.pct > 0 ? '👑 ' : ''}${item.name}</span>
             <span class="text-indigo-300">${item.count}/${item.total} (${item.pct}%)</span>
           </div>
+          <div class="text-[10px] text-amber-300/90 mb-1.5">${item.badge}</div>
           <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden">
             <div class="h-full bg-emerald-400 transition-all duration-300" style="width: ${item.pct}%"></div>
           </div>
@@ -604,21 +908,65 @@
       document.getElementById("weeklyChartLabels").innerHTML = labelsHTML;
       document.getElementById("weeklyAvgBadge").textContent = `${Math.round(weekSum / 7)}% Avg`;
 
-      // Streak
-      let streak = 0;
-      let cursor = new Date(dateStr + "T00:00:00");
-      while (true) {
-        const cStr = cursor.toISOString().split("T")[0];
-        const gList = getGoalsForDate(cStr);
-        const cMap = (state.completions && state.completions[state.currentUser] && state.completions[state.currentUser][cStr]) || {};
-        if (gList.some(g => cMap[g.id])) {
-          streak++;
-          cursor.setDate(cursor.getDate() - 1);
-        } else break;
+      // Visual Score Trend Graph
+      const trendScores = [...(state.scores || [])].reverse();
+      const trendContainer = document.getElementById("scoreTrendChart");
+      if (trendScores.length === 0) {
+        trendContainer.innerHTML = `<div class="text-xs text-slate-500 m-auto">No RPT/CPT scores logged yet. Post your first score above to see the trend graph!</div>`;
+      } else {
+        trendContainer.innerHTML = trendScores.map(s => {
+          const hPct = Math.max(8, Math.round((Math.max(0, s.total) / 300) * 100));
+          return `
+            <div class="flex flex-col items-center justify-end h-full min-w-[54px]">
+              <span class="text-[10px] font-bold text-emerald-400 mb-1">${s.total}</span>
+              <div class="w-7 bg-slate-800 rounded-t-lg h-20 flex items-end p-0.5 border border-slate-700">
+                <div class="w-full rounded-t bg-gradient-to-t from-indigo-500 to-emerald-400" style="height: ${hPct}%"></div>
+              </div>
+              <span class="text-[9px] text-slate-300 font-semibold mt-1 truncate max-w-[52px]">${s.exam.split(" ")[0]}</span>
+              <span class="text-[8px] text-slate-400 truncate max-w-[52px]">${s.user}</span>
+            </div>
+          `;
+        }).join("");
       }
-      document.getElementById("myStreakCount").textContent = `${streak} Days`;
 
-      // Upcoming Exams
+      // Score Table
+      document.getElementById("scoreLogTable").innerHTML = (state.scores || []).map((s, idx) => {
+        const sId = s.id || idx;
+        return `
+          <tr>
+            <td class="py-2 px-2 font-semibold text-white">${s.user}</td>
+            <td class="py-2 px-2 text-slate-300">${s.exam}</td>
+            <td class="py-2 px-2 text-sky-400">${s.phy}</td>
+            <td class="py-2 px-2 text-amber-400">${s.chem}</td>
+            <td class="py-2 px-2 text-rose-400">${s.math}</td>
+            <td class="py-2 px-2 font-bold text-emerald-400">${s.total}/300</td>
+            <td class="py-2 px-2 text-indigo-300">${s.acc || '-'}</td>
+            <td class="py-2 px-1 text-right"><button onclick="deleteScore('${sId}')" class="text-rose-400 hover:text-rose-300 font-bold">✕</button></td>
+          </tr>
+        `;
+      }).join("");
+
+      // Squad Mistake & Doubt Wall
+      const notesContainer = document.getElementById("squadNotesList");
+      if (!state.notes || state.notes.length === 0) {
+        notesContainer.innerHTML = `<div class="text-xs text-slate-500 p-3 bg-slate-800/40 rounded-xl">No mistakes or formulas posted yet. Share your first note above!</div>`;
+      } else {
+        notesContainer.innerHTML = state.notes.map(n => `
+          <div class="p-3 rounded-xl bg-slate-800/70 border border-slate-700 flex justify-between items-start gap-2">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300">${n.subj}</span>
+                <span class="text-xs font-bold text-white">${n.user}</span>
+                <span class="text-[10px] text-slate-400">${n.time || ''}</span>
+              </div>
+              <p class="text-xs text-slate-200">${n.text}</p>
+            </div>
+            <button onclick="deleteSquadNote('${n.id}')" class="text-rose-400 hover:text-rose-300 text-xs font-bold px-1">✕</button>
+          </div>
+        `).join("");
+      }
+
+      // Upcoming Exams Radar
       const upDates = Object.keys(scheduleDB).sort().filter(d => d >= dateStr && (scheduleDB[d].jeeExam || scheduleDB[d].boardExam || scheduleDB[d].dpt)).slice(0, 7);
       document.getElementById("upcomingExamsList").innerHTML = upDates.map(d => {
         const it = scheduleDB[d];
@@ -635,23 +983,11 @@
             <div class="space-y-0.5">${tags.map(t => `<div>${t}</div>`).join("")}</div>
           </div>`;
       }).join("");
-
-      // Scores
-      document.getElementById("scoreLogTable").innerHTML = (state.scores || []).map(s => `
-        <tr>
-          <td class="py-2 px-2 font-semibold text-white">${s.user}</td>
-          <td class="py-2 px-2 text-slate-300">${s.exam}</td>
-          <td class="py-2 px-2 text-sky-400">${s.phy}</td>
-          <td class="py-2 px-2 text-amber-400">${s.chem}</td>
-          <td class="py-2 px-2 text-rose-400">${s.math}</td>
-          <td class="py-2 px-2 font-bold text-emerald-400">${s.total} / 300</td>
-        </tr>
-      `).join("");
     }
 
     renderAll();
     syncFromCloud();
-    setInterval(syncFromCloud, 12000);
+    setInterval(syncFromCloud, 10000);
   </script>
 </body>
 </html>
