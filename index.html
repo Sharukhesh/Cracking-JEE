@@ -374,7 +374,7 @@
             const savedName = localStorage.getItem("sngs_my_name") || state.currentUser;
             state = {
               members: cloudData.members || state.members,
-              currentUser: (cloudData.members && cloudData.members.includes(savedName)) ? savedName : (cloudData.members ? cloudData.members[0] : "Gowthaman"),
+              currentUser: (cloudData.members && cloudData.members.includes(savedName)) ? savedName : (cloudData.members ? cloudData.members[0] : "ADMIN"),
               completions: cloudData.completions || {},
               customGoals: cloudData.customGoals || {},
               scores: cloudData.scores || []
